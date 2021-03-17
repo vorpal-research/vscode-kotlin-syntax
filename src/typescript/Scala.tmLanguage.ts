@@ -11,7 +11,7 @@ const letterOrDigitChars = `${letterChars}0-9`
 const letterOrDigit = `[${letterOrDigitChars}]`
 const alphaId = `${letter}+`
 const letterOrDigitNoDollarSign = letterOrDigit.replace("\\$", "")
-const simpleInterpolatedVariable  = `${letter}${letterOrDigitNoDollarSign}*` // see SIP-11 https://docs.scala-lang.org/sips/string-interpolation.html
+const simpleInterpolatedVariable  = `${letter}${letterOrDigitNoDollarSign}*` // see SIP-11 https://docs.kotlin-lang.org/sips/string-interpolation.html
 const opchar = `[!#%&*+\\-\\/:<>=?@^|~\\p{Sm}\\p{So}]`
 const idrest = `${letter}${letterOrDigit}*(?:(?<=_)${opchar}+)?`
 const idUpper = `${upperLetter}${letterOrDigit}*(?:(?<=_)${opchar}+)?`
@@ -22,11 +22,12 @@ const anyId = `(?:${plainid}|${backQuotedId})`
 const endOfLineMaybeWithComment = "(?=\\s*(//.*|/\\*(?!.*\\*/\\s*\\S.*).*)?$)"
 const notStartOfComment = "(?!//|/\\*)"
 
-export const scalaTmLanguage: TmLanguage = {
+// language=RegExp
+export const kotlinTmLanguage: TmLanguage = {
   fileTypes: [
-    'scala'
+    'kotlin'
   ],
-  firstLineMatch: '^#!/.*\\b\\w*scala\\b',
+  firstLineMatch: '^#!/.*\\b\\w*kotlin\\b',
   foldingStartMarker: '/\\*\\*|\\{\\s*$',
   foldingStopMarker: '\\*\\*/|^\\s*\\}',
   keyEquivalent: '^~S',
@@ -35,17 +36,17 @@ export const scalaTmLanguage: TmLanguage = {
       match: '(\\(\\))',
       captures: {
         '1': {
-          name: 'meta.bracket.scala'
+          name: 'meta.bracket.kotlin'
         }
       },
-      name: 'meta.parentheses.scala'
+      name: 'meta.parentheses.kotlin'
     },
     imports: {
       end: '(?<=[\\n;])',
       begin: '\\b(import)\\s+',
       beginCaptures: {
         '1': {
-          name: 'keyword.other.import.scala'
+          name: 'keyword.other.import.kotlin'
         }
       },
       patterns: [
@@ -53,164 +54,45 @@ export const scalaTmLanguage: TmLanguage = {
           include: '#comments'
         },
         {
-          match: '\\b(given)\\b',
-          name: 'keyword.other.import.given.scala'
-        },
-        {
           match: idUpper,
-          name: 'entity.name.class.import.scala'
+          name: 'entity.name.class.import.kotlin'
         },
         {
           match: `(${backQuotedId}|${plainid})`,
-          name: 'entity.name.import.scala'
+          name: 'entity.name.import.kotlin'
+        },
+        {
+          match: `\\b(as)\\b`,
+          name: 'keyword.other.as.kotlin'
         },
         {
           match: '\\.',
           name: 'punctuation.definition.import'
-        },
-        {
-          end: '}',
-          begin: '{',
-          beginCaptures: {
-            '0': {
-              name: 'meta.bracket.scala'
-            }
-          },
-          patterns: [
-            {
-              match: `(?x)(given\\s)?\\s*(?:(${idUpper})|(${backQuotedId}|${plainid}))\\s*(=>)\\s*(?:(${idUpper})|(${backQuotedId}|${plainid}))\\s*`,
-              captures: {
-                '1': {
-                  name: 'keyword.other.import.given.scala'
-                },
-                '2': {
-                  name: 'entity.name.class.import.renamed-from.scala'
-                },
-                '3': {
-                  name: 'entity.name.import.renamed-from.scala'
-                },
-                '4': {
-                  name: 'keyword.other.arrow.scala'
-                },
-                '5': {
-                  name: 'entity.name.class.import.renamed-to.scala'
-                },
-                '6': {
-                  name: 'entity.name.import.renamed-to.scala'
-                }
-              }
-            },
-            {
-              match: '\\b(given)\\b',
-              name: 'keyword.other.import.given.scala'
-            },
-            {
-              match: `(given\\s+)?(?:(${idUpper})|(${backQuotedId}|${plainid}))`,
-              captures: {
-                '1': {
-                  name: 'keyword.other.import.given.scala'
-                },
-                '2': {
-                  name: 'entity.name.class.import.scala'
-                },
-                '3': {
-                  name: 'entity.name.import.scala'
-                }
-              }
-            }
-          ],
-          endCaptures: {
-            '0': {
-              name: 'meta.bracket.scala'
-            }
-          },
-          name: 'meta.import.selector.scala'
         }
       ],
-      name: 'meta.import.scala'
-    },
-    exports: {
-      end: '(?<=[\\n;])',
-      begin: '\\b(export)\\s+(given\\s+)?',
-      beginCaptures: {
-        '1': {
-          name: 'keyword.other.export.scala'
-        },
-        '2': {
-          name: 'keyword.other.export.given.scala'
-        }
-      },
-      patterns: [
-        {
-          include: '#comments'
-        },
-        {
-          match: `(${backQuotedId}|${plainid})`,
-          name: 'entity.name.export.scala'
-        },
-        {
-          match: '\\.',
-          name: 'punctuation.definition.export'
-        },
-        {
-          end: '}',
-          begin: '{',
-          beginCaptures: {
-            '0': {
-              name: 'meta.bracket.scala'
-            }
-          },
-          patterns: [
-            {
-              match: `(?x)\\s*(${backQuotedId}|${plainid})\\s*(=>)\\s*(${backQuotedId}|${plainid})\\s*`,
-              captures: {
-                '1': {
-                  name: 'entity.name.export.renamed-from.scala'
-                },
-                '2': {
-                  name: 'keyword.other.arrow.scala'
-                },
-                '3': {
-                  name: 'entity.name.export.renamed-to.scala'
-                }
-              }
-            },
-            {
-              match: '([^\\s.,}]+)',
-              name: 'entity.name.export.scala'
-            }
-          ],
-          endCaptures: {
-            '0': {
-              name: 'meta.bracket.scala'
-            }
-          },
-          name: 'meta.export.selector.scala'
-        }
-      ],
-      name: 'meta.export.scala'
+      name: 'meta.import.kotlin'
     },
     constants: {
       patterns: [
         {
           match: '\\b(false|null|true)\\b',
-          name: 'constant.language.scala'
+          name: 'constant.language.kotlin'
         },
         {
-          match: '\\b(0[xX][0-9a-fA-F_]*)\\b',
-          name: 'constant.numeric.scala'
+          match: '\\b(0[xX][0-9a-fA-F]*)\\b',
+          name: 'constant.numeric.kotlin'
         },
         {
-          match: '\\b(([0-9][0-9_]*(\\.[0-9][0-9_]*)?)([eE](\\+|-)?[0-9][0-9_]*)?|[0-9][0-9_]*)[LlFfDd]?\\b',
-          name: 'constant.numeric.scala'
+          match: '\\b(0[bB][01]*)\\b',
+          name: 'constant.numeric.kotlin'
         },
         {
-          match: '(\\.[0-9][0-9_]*)([eE](\\+|-)?[0-9][0-9_]*)?[LlFfDd]?\\b',
-          name: 'constant.numeric.scala'
+          match: '\\b(([0-9][0-9_]*(\\.[0-9][0-9_]*)?)([eE](\\+|-)?[0-9][0-9_]*)?|[0-9][0-9_]*)[Ff]?\\b',
+          name: 'constant.numeric.kotlin'
         },
         {
           match: '\\b(this|super)\\b',
-          name: 'variable.language.scala'
+          name: 'variable.language.kotlin'
         }
       ]
     },
@@ -218,10 +100,10 @@ export const scalaTmLanguage: TmLanguage = {
       match: '^#!(.*)$',
       captures: {
         '1': {
-          name: 'string.unquoted.shebang.scala'
+          name: 'string.unquoted.shebang.kotlin'
         }
       },
-      name: 'comment.block.shebang.scala'
+      name: 'comment.block.shebang.kotlin'
     },
     code: {
       patterns: [
@@ -268,7 +150,7 @@ export const scalaTmLanguage: TmLanguage = {
           include: '#constants'
         },
         {
-          include: '#scala-symbol'
+          include: '#kotlin-symbol'
         },
         {
           include: '#singleton-type'
@@ -277,7 +159,7 @@ export const scalaTmLanguage: TmLanguage = {
           include: '#inline'
         },
         {
-          include: '#scala-quoted'
+          include: '#kotlin-quoted'
         },
         {
           include: '#char-literal'
@@ -309,274 +191,89 @@ export const scalaTmLanguage: TmLanguage = {
       ]
     },
     strings: {
+
       patterns: [
         {
           end: '"""(?!")',
           begin: '"""',
           beginCaptures: {
             '0': {
-              name: 'punctuation.definition.string.begin.scala'
+              name: 'punctuation.definition.string.begin.kotlin'
             }
           },
           patterns: [
             {
-              match: '\\\\\\\\|\\\\u[0-9A-Fa-f]{4}',
-              name: 'constant.character.escape.scala'
+              include: "#string-interpolation"
             }
           ],
           endCaptures: {
             '0': {
-              name: 'punctuation.definition.string.end.scala'
+              name: 'punctuation.definition.string.end.kotlin'
             }
           },
-          name: 'string.quoted.triple.scala'
-        },
-        {
-          begin: `\\b(raw)(""")`,
-          end: `(""")(?!")|\\$\n|(\\$[^\\$"_{${letterChars}])`,
-          beginCaptures: {
-            '1': {
-              name: 'keyword.interpolation.scala'
-            },
-            '2': {
-              name: 'string.quoted.triple.interpolated.scala punctuation.definition.string.begin.scala'
-            }
-          },
-          patterns: [
-            {
-              match: "\\$[\\$\"]",
-              name: 'constant.character.escape.scala'
-            },
-            {
-              "include": "#string-interpolation"
-            },
-            {
-              match: '.',
-              name: 'string.quoted.triple.interpolated.scala'
-            }
-          ],
-          endCaptures: {
-            '1': {
-              name: 'string.quoted.triple.interpolated.scala punctuation.definition.string.end.scala'
-            },
-            '2': {
-              name: 'invalid.illegal.unrecognized-string-escape.scala'
-            }
-          }
-        },
-        {
-          begin: `\\b(${alphaId})(""")`,
-          end: `(""")(?!")|\\$\n|(\\$[^\\$"_{${letterChars}])`,
-          beginCaptures: {
-            '1': {
-              name: 'keyword.interpolation.scala'
-            },
-            '2': {
-              name: 'string.quoted.triple.interpolated.scala punctuation.definition.string.begin.scala'
-            }
-          },
-          patterns: [
-            {
-              "include": "#string-interpolation"
-            },
-            {
-              match: '\\\\\\\\|\\\\u[0-9A-Fa-f]{4}',
-              name: 'constant.character.escape.scala'
-            },
-            {
-              match: '.',
-              name: 'string.quoted.triple.interpolated.scala'
-            }
-          ],
-          endCaptures: {
-            '1': {
-              name: 'string.quoted.triple.interpolated.scala punctuation.definition.string.end.scala'
-            },
-            '2': {
-              name: 'invalid.illegal.unrecognized-string-escape.scala'
-            }
-          }
+          name: 'string.quoted.triple.kotlin'
         },
         {
           end: '"',
           begin: '"',
           beginCaptures: {
             '0': {
-              name: 'punctuation.definition.string.begin.scala'
+              name: 'punctuation.definition.string.begin.kotlin'
             }
           },
           patterns: [
             {
-              match: `\\\\(?:[btnfr\\\\"']|[0-7]{1,3}|u[0-9A-Fa-f]{4})`,
-              name: 'constant.character.escape.scala'
+              match: `\\\\(?:[btnfr$\\\\"']|[0-7]{1,3}|u[0-9A-Fa-f]{4})`,
+              name: 'constant.character.escape.kotlin'
             },
             {
               match: '\\\\.',
-              name: 'invalid.illegal.unrecognized-string-escape.scala'
+              name: 'invalid.illegal.unrecognized-string-escape.kotlin'
+            },
+            {
+              include: "#string-interpolation"
             }
           ],
           endCaptures: {
             '0': {
-              name: 'punctuation.definition.string.end.scala'
+              name: 'punctuation.definition.string.end.kotlin'
             }
           },
-          name: 'string.quoted.double.scala'
-        },
-        {
-          begin: `\\b(raw)(")`,
-          end: `(")|\\$\n|(\\$[^\\$"_{${letterChars}])`,
-          beginCaptures: {
-            '1': {
-              name: 'keyword.interpolation.scala'
-            },
-            '2': {
-              name: 'string.quoted.double.interpolated.scala punctuation.definition.string.begin.scala'
-            }
-          },
-          patterns: [
-            {
-              match: "\\$[\\$\"]",
-              name: 'constant.character.escape.scala'
-            },
-            {
-              include: "#string-interpolation"
-            },
-            {
-              match: '.',
-              name: 'string.quoted.double.interpolated.scala'
-            }
-          ],
-          endCaptures: {
-            '1': {
-              name: 'string.quoted.double.interpolated.scala punctuation.definition.string.end.scala'
-            },
-            '2': {
-              name: 'invalid.illegal.unrecognized-string-escape.scala'
-            }
-          }
-        },
-        {
-          begin: `\\b(${alphaId})(")`,
-          end: `(")|\\$\n|(\\$[^\\$"_{${letterChars}])`,
-          beginCaptures: {
-            '1': {
-              name: 'keyword.interpolation.scala'
-            },
-            '2': {
-              name: 'string.quoted.double.interpolated.scala punctuation.definition.string.begin.scala'
-            }
-          },
-          patterns: [
-            {
-              match: "\\$[\\$\"]",
-              name: 'constant.character.escape.scala'
-            },
-            {
-              include: "#string-interpolation"
-            },
-            {
-              match: `\\\\(?:[btnfr\\\\"']|[0-7]{1,3}|u[0-9A-Fa-f]{4})`,
-              name: 'constant.character.escape.scala'
-            },
-            {
-              match: '\\\\.',
-              name: 'invalid.illegal.unrecognized-string-escape.scala'
-            },
-            {
-              match: '.',
-              name: 'string.quoted.double.interpolated.scala'
-            }
-          ],
-          endCaptures: {
-            '1': {
-              name: 'string.quoted.double.interpolated.scala punctuation.definition.string.end.scala'
-            },
-            '2': {
-              name: 'invalid.illegal.unrecognized-string-escape.scala'
-            }
-          }
-        }
-      ]
-    },
-    'using': {
-      patterns: [
-        {
-          match: `(?<=\\()\\s*(using)\\s`,
-          captures: {
-            '1': {
-              name: 'keyword.declaration.scala'
-            }
-          }
+          name: 'string.quoted.double.kotlin'
         }
       ]
     },
     'string-interpolation': {
       patterns: [
         {
-          name: "constant.character.escape.interpolation.scala",
-          match: "\\$\\$"
-        },
-        {
-          name: "meta.template.expression.scala",
+          name: "meta.template.expression.kotlin",
           match: `(\\$)(${simpleInterpolatedVariable})`,
           captures: {
             "1": {
-              name: "punctuation.definition.template-expression.begin.scala"
+              name: "punctuation.definition.template-expression.begin.kotlin"
             }
           }
         },
         {
-            name: "meta.template.expression.scala",
+            name: "meta.template.expression.kotlin",
             begin: "\\$\\{",
-            beginCaptures: { "0": { name: "punctuation.definition.template-expression.begin.scala" } },
+            beginCaptures: { "0": { name: "punctuation.definition.template-expression.begin.kotlin" } },
             end: "\\}",
-            endCaptures: { "0": { name: "punctuation.definition.template-expression.end.scala" } },
+            endCaptures: { "0": { name: "punctuation.definition.template-expression.end.kotlin" } },
             patterns: [
                 {
                     include: "#code"
                 }
             ],
-            contentName: "meta.embedded.line.scala"
+            contentName: "meta.embedded.line.kotlin"
         }
       ]
-    },
-    'xml-entity': {
-      match: '(&)([:a-zA-Z_][:a-zA-Z0-9_.-]*|#[0-9]+|#x[0-9a-fA-F]+)(;)',
-      captures: {
-        '1': {
-          name: 'punctuation.definition.constant.xml'
-        },
-        '3': {
-          name: 'punctuation.definition.constant.xml'
-        }
-      },
-      name: 'constant.character.entity.xml'
-    },
-    'xml-singlequotedString': {
-      end: "'",
-      begin: "'",
-      beginCaptures: {
-        '0': {
-          name: 'punctuation.definition.string.begin.xml'
-        }
-      },
-      patterns: [
-        {
-          include: '#xml-entity'
-        }
-      ],
-      endCaptures: {
-        '0': {
-          name: 'punctuation.definition.string.end.xml'
-        }
-      },
-      name: 'string.quoted.single.xml'
     },
     'meta-colons': {
       patterns: [
         {
           match: '(?<!:):(?!:)',
-          name: 'meta.colon.scala'
+          name: 'meta.colon.kotlin'
         }
       ],
       comment: 'For themes: Matching type colons'
@@ -585,72 +282,55 @@ export const scalaTmLanguage: TmLanguage = {
       patterns: [
         {
           match: '\\b(return|throw)\\b',
-          name: 'keyword.control.flow.jump.scala'
+          name: 'keyword.control.flow.jump.kotlin'
         },
         {
-          match: '\\b(classOf|isInstanceOf|asInstanceOf)\\b',
-          name: 'support.function.type-of.scala'
+          match: '\\b(as\\?)',
+          name: 'support.function.type-of.kotlin'
         },
         {
-          match: '\\b(else|if|then|do|while|for|yield|match|case)\\b',
-          name: 'keyword.control.flow.scala'
+          match: '\\b(as|is)\\b',
+          name: 'support.function.type-of.kotlin'
         },
         {
-          match: `^\\s*(end)\\s+(if|while|for|match)${endOfLineMaybeWithComment}`,
-          name: 'keyword.control.flow.end.scala'
-        },
-        {
-          match: `^\\s*(end)\\s+(val)${endOfLineMaybeWithComment}`,
-          name: 'keyword.declaration.stable.end.scala'
-        },
-        {
-          match: `^\\s*(end)\\s+(var)${endOfLineMaybeWithComment}`,
-          name: 'keyword.declaration.volatile.end.scala'
-        },
-        {
-          match: `^\\s*(end)\\s+(?:(new|extension)|(${idUpper}))${endOfLineMaybeWithComment}`,
-          captures: {
-            '1': {
-              name: 'keyword.declaration.end.scala'
-            },
-            '2': {
-              name: 'keyword.declaration.end.scala'
-            },
-            '3': {
-              name: 'entity.name.type.declaration'
-            }
-          }
-        },
-        {
-          match: `^\\s*(end)\\s+(${backQuotedId}|${plainid})?${endOfLineMaybeWithComment}`,
-          captures: {
-            '1': {
-              name: 'keyword.declaration.end.scala'
-            },
-            '2': {
-              name: 'entity.name.declaration'
-            }
-          }
+          match: '\\b(else|if|do|while|for|when)\\b',
+          name: 'keyword.control.flow.kotlin'
         },
         {
           match: '\\b(catch|finally|try)\\b',
-          name: 'keyword.control.exception.scala'
+          name: 'keyword.control.exception.kotlin'
         },
         {
-          match: '(==?|!=|<=|>=|<>|<|>)',
-          name: 'keyword.operator.comparison.scala'
+          match: '(===?|!==?|<=|>=|<>|<|>)',
+          name: 'keyword.operator.comparison.kotlin'
         },
         {
-          match: '(\\-|\\+|\\*|/(?![/*])|%|~)',
-          name: 'keyword.operator.arithmetic.scala'
+          match: '((?<![!=<>])=(?!=))',
+          name: 'keyword.operator.assignment.kotlin'
         },
         {
-          match: `(?<!${opchar})(!|&&|\\|\\|)(?!${opchar})`,
-          name: 'keyword.operator.logical.scala'
+          match: '([+-/*%]=(?!=))',
+          name: 'keyword.operator.assignment.kotlin'
         },
         {
-          match: '(<-|←|->|→|=>|⇒|\\?|\\:+|@|\\|)+',
-          name: 'keyword.operator.scala'
+          match: '(\\-(?!>)|\\+|\\*|/(?![/*])|%)',
+          name: 'keyword.operator.arithmetic.kotlin'
+        },
+        {
+          match: `(!(?![=!])|&&|\\|\\|)`,
+          name: 'keyword.operator.logical.kotlin'
+        },
+        {
+          match: `(!!)+`,
+          name: 'keyword.operator.bangbang.kotlin'
+        },
+        {
+          match: `(\\?:(?!:))`,
+          name: 'keyword.operator.elvis.kotlin'
+        },
+        {
+          match: `(->)`,
+          name: 'keyword.operator.arrow.kotlin'
         }
       ]
     },
@@ -658,61 +338,37 @@ export const scalaTmLanguage: TmLanguage = {
       match: `\\.(type)(?!${idrest}|[0-9])`,
       captures: {
         '1': {
-          name: 'keyword.type.scala'
+          name: 'keyword.type.kotlin'
         }
       }
     },
     inline: {
       patterns: [
         { // inline parameters
-          match: `\\b(inline)(?=\\s+(${plainid}|${backQuotedId})\\s*:)`,
+          match: `\\b(noinline|crossinline)(?=\\s+(${plainid}|${backQuotedId})\\s*:)`,
           name: 'storage.modifier.other'
-        },
-        {
-          match: `\\b(inline)\\b(?=(?:.(?!\\b(?:val|def|given)\\b))*\\b(if|match)\\b)`,
-          name: 'keyword.control.flow.scala'
         }
       ]
     },
-    'scala-quoted': {
+    'kotlin-quoted': {
       patterns: [
         { // Start of `'{ .. }` or `${ .. }`
           match: "['$]\\{(?!')",
-          name: 'punctuation.section.block.begin.scala'
+          name: 'punctuation.section.block.begin.kotlin'
         },
         { // Start of `'[ .. ]`
           match: "'\\[(?!')",
-          name: 'meta.bracket.scala'
+          name: 'meta.bracket.kotlin'
         }
       ]
-    },
-    'xml-doublequotedString': {
-      end: '"',
-      begin: '"',
-      beginCaptures: {
-        '0': {
-          name: 'punctuation.definition.string.begin.xml'
-        }
-      },
-      patterns: [
-        {
-          include: '#xml-entity'
-        }
-      ],
-      endCaptures: {
-        '0': {
-          name: 'punctuation.definition.string.end.xml'
-        }
-      },
-      name: 'string.quoted.double.xml'
     },
     declarations: {
       patterns: [
         {
-          match: `\\b(def)\\b\\s*${notStartOfComment}(${anyId})?`,
+          match: `\\b(fun)\\b\\s*${notStartOfComment}(${anyId})?`,
           captures: {
             '1': {
-              name: 'keyword.declaration.scala'
+              name: 'keyword.declaration.kotlin'
             },
             '2': {
               name: 'entity.name.function.declaration'
@@ -720,24 +376,41 @@ export const scalaTmLanguage: TmLanguage = {
           }
         },
         {
-          match: `\\b(trait)\\b\\s*${notStartOfComment}(${anyId})?`,
+          match: `\\b(?:(fun)\\s+)?(interface)\\b\\s*${notStartOfComment}(${anyId})?`,
           captures: {
             '1': {
-              name: 'keyword.declaration.scala'
+              name: 'keyword.declaration.kotlin'
             },
             '2': {
+              name: 'keyword.declaration.kotlin'
+            },
+            '3': {
               name: 'entity.name.class.declaration'
             }
           }
         },
         {
-          match: `\\b(?:(case)\\s+)?(class|object|enum)\\b\\s*${notStartOfComment}(${anyId})?`,
+          match: `\\b(?:(data|enum|annotation)\\s+)?(class)\\b\\s*${notStartOfComment}(${anyId})?`,
           captures: {
             '1': {
-              name: 'keyword.declaration.scala'
+              name: 'keyword.declaration.kotlin'
             },
             '2': {
-              name: 'keyword.declaration.scala'
+              name: 'keyword.declaration.kotlin'
+            },
+            '3': {
+              name: 'entity.name.class.declaration'
+            }
+          }
+        },
+        {
+          match: `\\b(?:(companion)\\s+)?(object)\\b\\s*${notStartOfComment}(${anyId})?`,
+          captures: {
+            '1': {
+              name: 'keyword.declaration.kotlin'
+            },
+            '2': {
+              name: 'keyword.declaration.kotlin'
             },
             '3': {
               name: 'entity.name.class.declaration'
@@ -748,7 +421,7 @@ export const scalaTmLanguage: TmLanguage = {
           match: `(?<!\\.)\\b(type)\\b\\s*${notStartOfComment}(${anyId})?`,
           captures: {
             '1': {
-              name: 'keyword.declaration.scala'
+              name: 'keyword.declaration.kotlin'
             },
             '2': {
               name: 'entity.name.type.declaration'
@@ -759,10 +432,10 @@ export const scalaTmLanguage: TmLanguage = {
           match: `\\b(?:(val)|(var))\\b\\s*${notStartOfComment}(?=${anyId}?\\()`,
           captures: {
             '1': {
-              name: 'keyword.declaration.stable.scala'
+              name: 'keyword.declaration.stable.kotlin'
             },
             '2': {
-              name: 'keyword.declaration.volatile.scala'
+              name: 'keyword.declaration.volatile.kotlin'
             }
           }
         },
@@ -770,10 +443,10 @@ export const scalaTmLanguage: TmLanguage = {
           match: `\\b(?:(val)|(var))\\b\\s*${notStartOfComment}${anyId}(?=\\s*,)`,
           captures: {
             '1': {
-              name: 'keyword.declaration.stable.scala'
+              name: 'keyword.declaration.stable.kotlin'
             },
             '2': {
-              name: 'keyword.declaration.volatile.scala'
+              name: 'keyword.declaration.volatile.kotlin'
             }
           }
         },
@@ -781,27 +454,13 @@ export const scalaTmLanguage: TmLanguage = {
           match: `\\b(?:(val)|(var))\\b\\s*${notStartOfComment}(${anyId})?`,
           captures: {
             '1': {
-              name: 'keyword.declaration.stable.scala'
+              name: 'keyword.declaration.stable.kotlin'
             },
             '2': {
-              name: 'keyword.declaration.volatile.scala'
+              name: 'keyword.declaration.volatile.kotlin'
             },
             '3': {
-              name: 'variable.other.declaration.scala'
-            }
-          }
-        },
-        {
-          match: `\\b(package)\\s+(object)\\b\\s*${notStartOfComment}(${anyId})?`,
-          captures: {
-            '1': {
-              name: 'keyword.other.scoping.scala'
-            },
-            '2': {
-              name: 'keyword.declaration.scala'
-            },
-            '3': {
-              name: 'entity.name.class.declaration'
+              name: 'variable.other.declaration.kotlin'
             }
           }
         },
@@ -810,7 +469,7 @@ export const scalaTmLanguage: TmLanguage = {
           begin: '\\b(package)\\s+',
           beginCaptures: {
             '1': {
-              name: 'keyword.other.import.scala'
+              name: 'keyword.other.import.kotlin'
             }
           },
           patterns: [
@@ -819,21 +478,14 @@ export const scalaTmLanguage: TmLanguage = {
             },
             {
               match: `(${backQuotedId}|${plainid})`,
-              name: 'entity.name.package.scala'
+              name: 'entity.name.package.kotlin'
             },
             {
               match: '\\.',
               name: 'punctuation.definition.package'
             }
           ],
-          name: 'meta.package.scala'
-        },
-        {
-          match: `\\b(given)\\b\\s*(${idLower}|${backQuotedId})?`,
-          captures: {
-            '1': { name: 'keyword.declaration.scala' },
-            '2': { name: 'entity.name.given.declaration' }
-          }
+          name: 'meta.package.kotlin'
         }
       ]
     },
@@ -842,17 +494,17 @@ export const scalaTmLanguage: TmLanguage = {
       begin: "'",
       beginCaptures: {
         '0': {
-          name: 'punctuation.definition.character.begin.scala'
+          name: 'punctuation.definition.character.begin.kotlin'
         }
       },
       patterns: [
         {
           match: `\\\\(?:[btnfr\\\\"']|[0-7]{1,3}|u[0-9A-Fa-f]{4})`,
-          name: 'constant.character.escape.scala'
+          name: 'constant.character.escape.kotlin'
         },
         {
           match: '\\\\.',
-          name: 'invalid.illegal.unrecognized-character-escape.scala'
+          name: 'invalid.illegal.unrecognized-character-escape.kotlin'
         },
         {
           match: "[^']{2,}",
@@ -865,34 +517,22 @@ export const scalaTmLanguage: TmLanguage = {
       ],
       endCaptures: {
         '0': {
-          name: 'punctuation.definition.character.end.scala'
+          name: 'punctuation.definition.character.end.kotlin'
         }
       },
-      name: 'string.quoted.other constant.character.literal.scala'
-    },
-    initialization: {
-      match: '\\b(new)\\b',
-      captures: {
-        '1': {
-          name: 'keyword.declaration.scala'
-        }
-      }
-    },
-    'scala-symbol': {
-      match: `(?>'${plainid})(?!')`,
-      name: 'constant.other.symbol.scala'
+      name: 'string.quoted.other constant.character.literal.kotlin'
     },
     'curly-braces': {
       begin: '\\{',
       end: '\\}',
       beginCaptures: {
         '0': {
-          name: 'punctuation.section.block.begin.scala'
+          name: 'punctuation.section.block.begin.kotlin'
         }
       },
       endCaptures: {
         '0': {
-          name: 'punctuation.section.block.end.scala'
+          name: 'punctuation.section.block.end.kotlin'
         }
       },
       patterns: [
@@ -906,16 +546,16 @@ export const scalaTmLanguage: TmLanguage = {
         {
           match: '\\{',
           comment: 'The punctuation.section.*.begin is needed for return snippet in source bundle',
-          name: 'punctuation.section.block.begin.scala'
+          name: 'punctuation.section.block.begin.kotlin'
         },
         {
           match: '\\}',
           comment: 'The punctuation.section.*.end is needed for return snippet in source bundle',
-          name: 'punctuation.section.block.end.scala'
+          name: 'punctuation.section.block.end.kotlin'
         },
         {
-          match: '{|}|\\(|\\)|\\[|\\]',
-          name: 'meta.bracket.scala'
+          match: '\\{|\\}|\\(|\\)|\\[|\\]',
+          name: 'meta.bracket.kotlin'
         }
       ],
       comment: 'For themes: Brackets look nice when colored.'
@@ -937,23 +577,18 @@ export const scalaTmLanguage: TmLanguage = {
     'storage-modifiers': {
       patterns: [
         {
-          match: '\\b(private\\[\\S+\\]|protected\\[\\S+\\]|private|protected)\\b',
+          match: '\\b(public|private|protected)\\b',
           name: 'storage.modifier.access'
         },
         {
-          match: '\\b(synchronized|@volatile|abstract|final|lazy|sealed|implicit|override|@transient|@native)\\b',
+          match: '\\b(abstract|open|final|sealed|override|inner)\\b',
           name: 'storage.modifier.other'
         },
         {
-          match: '(?<=^|\\s)\\b(transparent|opaque|infix|open|inline)\\b(?=[a-z\\s]*\\b(def|val|var|given|type|class|trait|object|enum)\\b)',
+          match: '(?<=^|\\s)\\b(tailrec|infix|open|inline|operator)\\b(?=[a-z\\s]*\\b(fun|val|var|get|set|class|interface|object)\\b)',
           name: 'storage.modifier.other'
         }
       ]
-    },
-    'meta-bounds': {
-      match: '<%|=:=|<:<|<%<|>:|<:',
-      comment: 'For themes: Matching view bounds',
-      name: 'meta.bounds.scala'
     },
     comments: {
       patterns: [
@@ -965,7 +600,7 @@ export const scalaTmLanguage: TmLanguage = {
           begin: '(^[ \\t]+)?(?=//)',
           beginCaptures: {
             '1': {
-              name: 'punctuation.whitespace.comment.leading.scala'
+              name: 'punctuation.whitespace.comment.leading.kotlin'
             }
           },
           patterns: [
@@ -974,10 +609,10 @@ export const scalaTmLanguage: TmLanguage = {
               begin: '//',
               beginCaptures: {
                 '0': {
-                  name: 'punctuation.definition.comment.scala'
+                  name: 'punctuation.definition.comment.kotlin'
                 }
               },
-              name: 'comment.line.double-slash.scala'
+              name: 'comment.line.double-slash.kotlin'
             }
           ]
         }
@@ -989,17 +624,17 @@ export const scalaTmLanguage: TmLanguage = {
           match: '/\\*\\*/',
           captures: {
             '0': {
-              name: 'punctuation.definition.comment.scala'
+              name: 'punctuation.definition.comment.kotlin'
             }
           },
-          name: 'comment.block.empty.scala'
+          name: 'comment.block.empty.kotlin'
         },
         {
           end: '\\*/',
           begin: '^\\s*(/\\*\\*)(?!/)',
           beginCaptures: {
             '1': {
-              name: 'punctuation.definition.comment.scala'
+              name: 'punctuation.definition.comment.kotlin'
             }
           },
           patterns: [
@@ -1007,10 +642,10 @@ export const scalaTmLanguage: TmLanguage = {
               match: '(@param)\\s+(\\S+)',
               captures: {
                 '1': {
-                  name: 'keyword.other.documentation.scaladoc.scala'
+                  name: 'keyword.other.documentation.kotlindoc.kotlin'
                 },
                 '2': {
-                  name: 'variable.parameter.scala'
+                  name: 'variable.parameter.kotlin'
                 }
               }
             },
@@ -1018,7 +653,7 @@ export const scalaTmLanguage: TmLanguage = {
               match: '(@(?:tparam|throws))\\s+(\\S+)',
               captures: {
                 '1': {
-                  name: 'keyword.other.documentation.scaladoc.scala'
+                  name: 'keyword.other.documentation.kotlindoc.kotlin'
                 },
                 '2': {
                   name: 'entity.name.class'
@@ -1027,19 +662,19 @@ export const scalaTmLanguage: TmLanguage = {
             },
             {
               match: '@(return|see|note|example|constructor|usecase|author|version|since|todo|deprecated|migration|define|inheritdoc)\\b',
-              name: 'keyword.other.documentation.scaladoc.scala'
+              name: 'keyword.other.documentation.kotlindoc.kotlin'
             },
             {
               match: '(\\[\\[)([^\\]]+)(\\]\\])',
               captures: {
                 '1': {
-                  name: 'punctuation.definition.documentation.link.scala'
+                  name: 'punctuation.definition.documentation.link.kotlin'
                 },
                 '2': {
                   name: 'string.other.link.title.markdown'
                 },
                 '3': {
-                  name: 'punctuation.definition.documentation.link.scala'
+                  name: 'punctuation.definition.documentation.link.kotlin'
                 }
               }
             },
@@ -1049,17 +684,17 @@ export const scalaTmLanguage: TmLanguage = {
           ],
           endCaptures: {
             '0': {
-              name: 'punctuation.definition.comment.scala'
+              name: 'punctuation.definition.comment.kotlin'
             }
           },
-          name: 'comment.block.documentation.scala'
+          name: 'comment.block.documentation.kotlin'
         },
         {
           end: '\\*/',
           begin: '/\\*',
           captures: {
             '0': {
-              name: 'punctuation.definition.comment.scala'
+              name: 'punctuation.definition.comment.kotlin'
             }
           },
           patterns: [
@@ -1067,50 +702,8 @@ export const scalaTmLanguage: TmLanguage = {
               "include": "#block-comments"
             }
           ],
-          name: 'comment.block.scala'
+          name: 'comment.block.kotlin'
         },
-      ]
-    },
-    'xml-embedded-content': {
-      patterns: [
-        {
-          end: '}',
-          begin: '{',
-          patterns: [
-            {
-              include: '#code'
-            }
-          ],
-          captures: {
-            '0': {
-              name: 'meta.bracket.scala'
-            }
-          },
-          name: 'meta.source.embedded.scala'
-        },
-        {
-          match: ' (?:([-_a-zA-Z0-9]+)((:)))?([_a-zA-Z-]+)=',
-          captures: {
-            '1': {
-              name: 'entity.other.attribute-name.namespace.xml'
-            },
-            '2': {
-              name: 'entity.other.attribute-name.xml'
-            },
-            '3': {
-              name: 'punctuation.separator.namespace.xml'
-            },
-            '4': {
-              name: 'entity.other.attribute-name.localname.xml'
-            }
-          }
-        },
-        {
-          include: '#xml-doublequotedString'
-        },
-        {
-          include: '#xml-singlequotedString'
-        }
       ]
     },
     inheritance: {
@@ -1119,10 +712,10 @@ export const scalaTmLanguage: TmLanguage = {
           match: `\\b(extends|with|derives)\\b\\s*(${idUpper}|${backQuotedId}|(?=\\([^\\)]+=>)|(?=${plainid})|(?="))?`,
           captures: {
             '1': {
-              name: 'keyword.declaration.scala'
+              name: 'keyword.declaration.kotlin'
             },
             '2': {
-              name: 'entity.other.inherited-class.scala'
+              name: 'entity.other.inherited-class.kotlin'
             }
           }
         }
@@ -1134,7 +727,7 @@ export const scalaTmLanguage: TmLanguage = {
           match: `^\\s*(extension)\\s+(?=[\\[\\(])`,
           captures: {
             '1': {
-              name: 'keyword.declaration.scala'
+              name: 'keyword.declaration.kotlin'
             },
           }
         }
@@ -1146,97 +739,12 @@ export const scalaTmLanguage: TmLanguage = {
           match: `(?<=[^\\._$a-zA-Z0-9])(${backQuotedId}|${idLower})\\s*(:)\\s+`,
           captures: {
             '1': {
-              name: 'variable.parameter.scala'
+              name: 'variable.parameter.kotlin'
             },
             '2': {
-              name: 'meta.colon.scala'
+              name: 'meta.colon.kotlin'
             }
           }
-        }
-      ]
-    },
-    'xml-literal': {
-      patterns: [
-        {
-          end: '(>(<))/(?:([-_a-zA-Z0-9]+)((:)))?([-_a-zA-Z0-9:]*[_a-zA-Z0-9])(>)',
-          begin: '(<)((?:([_a-zA-Z0-9][_a-zA-Z0-9]*)((:)))?([_a-zA-Z0-9][-_a-zA-Z0-9:]*))(?=(\\s[^>]*)?></\\2>)',
-          beginCaptures: {
-            '1': {
-              name: 'punctuation.definition.tag.xml'
-            },
-            '3': {
-              name: 'entity.name.tag.namespace.xml'
-            },
-            '4': {
-              name: 'entity.name.tag.xml'
-            },
-            '5': {
-              name: 'punctuation.separator.namespace.xml'
-            },
-            '6': {
-              name: 'entity.name.tag.localname.xml'
-            }
-          },
-          patterns: [
-            {
-              include: '#xml-embedded-content'
-            }
-          ],
-          comment: 'We do not allow a tag name to start with a - since this would likely conflict with the <- operator. This is not very common for tag names anyway.  Also code such as -- if (val <val2 || val> val3) will falsly be recognized as an xml tag.  The solution is to put a space on either side of the comparison operator',
-          endCaptures: {
-            '1': {
-              name: 'punctuation.definition.tag.xml'
-            },
-            '2': {
-              name: 'meta.scope.between-tag-pair.xml'
-            },
-            '3': {
-              name: 'entity.name.tag.namespace.xml'
-            },
-            '4': {
-              name: 'entity.name.tag.xml'
-            },
-            '5': {
-              name: 'punctuation.separator.namespace.xml'
-            },
-            '6': {
-              name: 'entity.name.tag.localname.xml'
-            },
-            '7': {
-              name: 'punctuation.definition.tag.xml'
-            }
-          },
-          name: 'meta.tag.no-content.xml'
-        },
-        {
-          end: '(/?>)',
-          begin: '(</?)(?:([_a-zA-Z0-9][-_a-zA-Z0-9]*)((:)))?([_a-zA-Z0-9][-_a-zA-Z0-9:]*)(?=[^>]*?>)',
-          patterns: [
-            {
-              include: '#xml-embedded-content'
-            }
-          ],
-          captures: {
-            '1': {
-              name: 'punctuation.definition.tag.xml'
-            },
-            '2': {
-              name: 'entity.name.tag.namespace.xml'
-            },
-            '3': {
-              name: 'entity.name.tag.xml'
-            },
-            '4': {
-              name: 'punctuation.separator.namespace.xml'
-            },
-            '5': {
-              name: 'entity.name.tag.localname.xml'
-            }
-          },
-          name: 'meta.tag.xml'
-        },
-        {
-          include: '#xml-entity'
         }
       ]
     }
@@ -1247,6 +755,6 @@ export const scalaTmLanguage: TmLanguage = {
       include: '#code'
     }
   ],
-  name: 'Scala',
-  scopeName: 'source.scala'
+  name: 'Kotlin',
+  scopeName: 'source.kotlin'
 }
