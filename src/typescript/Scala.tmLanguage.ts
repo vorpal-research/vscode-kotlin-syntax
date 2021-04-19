@@ -58,7 +58,7 @@ export const kotlinTmLanguage: TmLanguage = {
                 },
                 {
                     match: idUpper,
-                    name: 'entity.name.class.import.kotlin'
+                    name: 'entity.name.type.class.kotlin.import.kotlin'
                 },
                 {
                     match: `(${backQuotedId}|${plainid})`,
@@ -202,6 +202,12 @@ export const kotlinTmLanguage: TmLanguage = {
                     include: "#angle-brackets"
                 },
                 {
+                    include: "#generics"
+                },
+                {
+                    include: "#generics2"
+                },
+                {
                     include: "#init-block"
                 }
             ]
@@ -325,6 +331,14 @@ export const kotlinTmLanguage: TmLanguage = {
                     name: 'keyword.control.exception.kotlin'
                 },
                 {
+                    match: '(?<=::)\\s*(class)\\b',
+                    captures: {
+                        '1': {
+                            name: 'keyword.operator.class-literal.kotlin'
+                        }
+                    }
+                },
+                {
                     match: '(===?|!==?|<=|>=|<|>)',
                     name: 'keyword.operator.comparison.kotlin'
                 },
@@ -357,6 +371,10 @@ export const kotlinTmLanguage: TmLanguage = {
                     name: 'keyword.operator.elvis.kotlin'
                 },
                 {
+                    match: `(::)`,
+                    name: 'punctuation.separator.coloncolon.kotlin'
+                },
+                {
                     match: `(->)`,
                     name: 'keyword.operator.arrow.kotlin'
                 }
@@ -386,22 +404,10 @@ export const kotlinTmLanguage: TmLanguage = {
                 }
             ]
         },
-        'kotlin-quoted': {
-            patterns: [
-                { // Start of `'{ .. }` or `${ .. }`
-                    match: "['$]\\{(?!')",
-                    name: 'punctuation.section.block.begin.kotlin'
-                },
-                { // Start of `'[ .. ]`
-                    match: "'\\[(?!')",
-                    name: 'meta.bracket.kotlin'
-                }
-            ]
-        },
         declarations: {
             patterns: [
                 {
-                    end: '(?=[={])',
+                    end: '(?=[={;])',
                     begin: '\\b(fun)\\b',
                     beginCaptures: {
                         '1': {
@@ -425,7 +431,7 @@ export const kotlinTmLanguage: TmLanguage = {
                             match: `\\b(${anyId})\\s*\\.`,
                             captures: {
                                 '1': {
-                                    name: 'entity.name.class.declaration'
+                                    name: 'entity.name.type.class.kotlin'
                                 }
                             }
                         },
@@ -451,8 +457,8 @@ export const kotlinTmLanguage: TmLanguage = {
                 //     }
                 //   }
                 // },
-                {
-                    match: `\\b(?:(fun)\\s+)?(interface)\\b\\s*${notStartOfComment}(${anyId})?`,
+                { // non-generic interface
+                    match: `\\b(?:(fun)\\s+)?(interface)\\b\\s*(${anyId})\\s*(?!\\<)`,
                     captures: {
                         '1': {
                             name: 'keyword.declaration.kotlin'
@@ -461,12 +467,12 @@ export const kotlinTmLanguage: TmLanguage = {
                             name: 'keyword.declaration.kotlin'
                         },
                         '3': {
-                            name: 'entity.name.class.declaration'
+                            name: 'entity.name.type.class.kotlin.declaration'
                         }
                     }
                 },
-                {
-                    match: `\\b(?:(data|enum|annotation|inline|value)\\s+)?(class)\\b\\s*${notStartOfComment}(${anyId})?`,
+                { // non-generic class
+                    match: `\\b(?:(data|enum|annotation|inline|value)\\s+)?(class)\\b\\s*(${anyId})\\s*(?!\\<)`,
                     captures: {
                         '1': {
                             name: 'keyword.declaration.kotlin'
@@ -475,12 +481,44 @@ export const kotlinTmLanguage: TmLanguage = {
                             name: 'keyword.declaration.kotlin'
                         },
                         '3': {
-                            name: 'entity.name.class.declaration'
+                            name: 'entity.name.type.class.kotlin.declaration'
                         }
                     }
                 },
                 {
-                    match: `\\b(?:(companion)\\s+)?(object)\\b\\s*${notStartOfComment}(${anyId})?`,
+                    begin: `\\b(?:(fun)\\s+)?(interface)\\s+(${anyId})\\s*(\\<)`,
+                    end: '(?<!-)\\>',
+                    beginCaptures: {
+                        '1': {
+                            name: 'keyword.declaration.kotlin'
+                        },
+                        '2': {
+                            name: 'keyword.declaration.kotlin'
+                        },
+                        '3': {
+                            name: 'entity.name.type.class.kotlin.declaration'
+                        },
+                        '4': {
+                            name:'punctuation.bracket.angle.kotlin'
+                        }
+                    },
+                    endCaptures: {
+                        '0': {
+                            name:'punctuation.bracket.angle.kotlin'
+                        }
+                    },
+                    patterns: [
+                        {
+                            include: '#type-only-context'
+                        }
+                        // {
+                        //     include: '#code'
+                        // }
+                    ]
+                },
+                {
+                    begin: `\\b(?:(data|enum|annotation|inline|value)\\s+)?(class)\\s+(${anyId})\\s*(\\<)`,
+                    end: '(?<!-)\\>',
                     captures: {
                         '1': {
                             name: 'keyword.declaration.kotlin'
@@ -489,45 +527,101 @@ export const kotlinTmLanguage: TmLanguage = {
                             name: 'keyword.declaration.kotlin'
                         },
                         '3': {
-                            name: 'entity.name.class.declaration'
+                            name: 'entity.name.type.class.kotlin.declaration'
+                        },
+                        '4': {
+                            name:'punctuation.bracket.angle.kotlin'
                         }
-                    }
+                    },
+                    endCaptures: {
+                        '0': {
+                            name:'punctuation.bracket.angle.kotlin'
+                        }
+                    },
+                    patterns: [
+                        {
+                            include: '#type-only-context'
+                        },
+                        // {
+                        //     include: '#code'
+                        // }
+                    ]
                 },
-                {
-                    match: `(?<!\\.)\\b(typealias)\\b\\s*${notStartOfComment}(${anyId})?`,
+                { // non-generic class
+                    match: `\\b(typealias)\\b\\s*(${anyId})\\s*(?!\\<)`,
                     captures: {
                         '1': {
                             name: 'keyword.declaration.kotlin'
                         },
                         '2': {
-                            name: 'entity.name.type.declaration'
+                            name: 'entity.name.type.kotlin.declaration'
                         }
                     }
                 },
-                { // val (x1, x2) = tup // val Some(x) = opt
-                    match: `\\b(?:(val)|(var))\\b\\s*${notStartOfComment}(?=${anyId}?\\()`,
+                {
+                    begin: `\\b(typealias)\\b\\s*(${anyId})\\s*(\\<)`,
+                    end: '(?<!-)\\>',
+                    beginCaptures: {
+                        '1': {
+                            name: 'keyword.declaration.kotlin'
+                        },
+                        '2': {
+                            name: 'entity.name.type.class.kotlin.declaration'
+                        },
+                        '3': {
+                            name:'punctuation.bracket.angle.kotlin'
+                        }
+                    },
+                    endCaptures: {
+                        '0': {
+                            name:'punctuation.bracket.angle.kotlin'
+                        }
+                    },
+                    patterns: [
+                        {
+                            include: '#type-only-context'
+                        }
+                    ]
+                },
+                {
+                    match: `\\b(?:(companion)\\s+)?(object)\\b\\s*(${anyId})?`,
                     captures: {
+                        '1': {
+                            name: 'keyword.declaration.kotlin'
+                        },
+                        '2': {
+                            name: 'keyword.declaration.kotlin'
+                        },
+                        '3': {
+                            name: 'entity.name.type.class.kotlin.declaration'
+                        }
+                    }
+                },
+
+                {
+                    begin: `\\b(?:(val)|(var))\\b\\s*(?=[(])`,
+                    end: "(?<=\\))",
+                    beginCaptures: {
                         '1': {
                             name: 'keyword.declaration.stable.kotlin'
                         },
                         '2': {
                             name: 'keyword.declaration.volatile.kotlin'
                         }
-                    }
-                },
-                { // val x1, x2 = y
-                    match: `\\b(?:(val)|(var))\\b\\s*${notStartOfComment}${anyId}(?=\\s*,)`,
-                    captures: {
-                        '1': {
-                            name: 'keyword.declaration.stable.kotlin'
+                    },
+                    patterns: [
+                        {
+                            match: `${anyId}`,
+                            name: 'variable.other.definition.kotlin'
                         },
-                        '2': {
-                            name: 'keyword.declaration.volatile.kotlin'
+                        {
+                            match: ',',
+                            name: 'punctuation.comma.kotlin'
                         }
-                    }
+                    ]
                 },
                 {
-                    match: `\\b(?:(val)|(var))\\b\\s*${notStartOfComment}(${anyId})?`,
+                    match: `\\b(?:(val)|(var))\\b\\s*(${anyId})`,
                     captures: {
                         '1': {
                             name: 'keyword.declaration.stable.kotlin'
@@ -536,7 +630,18 @@ export const kotlinTmLanguage: TmLanguage = {
                             name: 'keyword.declaration.volatile.kotlin'
                         },
                         '3': {
-                            name: 'variable.other.declaration.kotlin'
+                            name: 'variable.other.definition.kotlin'
+                        }
+                    }
+                },
+                {
+                    match: `\\b(?:(val)|(var))\\b\\s*(?!(${anyId}|([(])))`,
+                    captures: {
+                        '1': {
+                            name: 'keyword.declaration.stable.kotlin'
+                        },
+                        '2': {
+                            name: 'keyword.declaration.volatile.kotlin'
                         }
                     }
                 },
@@ -620,16 +725,6 @@ export const kotlinTmLanguage: TmLanguage = {
         'angle-brackets': {
             begin: '(?<=\\<)',
             end: '(?=\\>)',
-            beginCaptures: {
-                '0': {
-                    name: 'punctuation.section.block.begin.kotlin'
-                }
-            },
-            endCaptures: {
-                '0': {
-                    name: 'punctuation.section.block.end.kotlin'
-                }
-            },
             patterns: [
                 {
                     match: '\\b(out|in|reified)\\b',
@@ -638,6 +733,85 @@ export const kotlinTmLanguage: TmLanguage = {
                 {
                     include: '#code'
                 },
+            ]
+        },
+        'type-only-context': {
+            patterns: [
+                {
+                    match: '\\b(out|in|reified|suspend)\\b',
+                    name: 'storage.modifier.other'
+                },
+                {
+                    match: ',',
+                    name: 'punctuation.comma.kotlin'
+                },
+                {
+                    match: '->',
+                    name: 'keyword.operator.arrow.kotlin'
+                },
+                {
+                    match: '\\*',
+                    name: 'keyword.operator.star.kotlin'
+                },
+                {
+                    match: `(${anyId}\s*\\?*)`,
+                    captures: {
+                        '1': { name: 'entity.name.type.class.kotlin' }
+                    }
+                },
+                {
+                    begin: '\\<',
+                    end: '(?<!-)\\>',
+                    beginCaptures: {
+                        '0': {
+                            name: 'punctuation.bracket.angle.open.kotlin'
+                        }
+                    },
+                    endCaptures: {
+                        '0': {
+                            name: 'punctuation.bracket.angle.close.kotlin'
+                        }
+                    },
+                    patterns: [{include: '#type-only-context'}]
+                },
+                {
+                    begin: '\\(',
+                    end: '\\)',
+                    beginCaptures: {
+                        '0': {
+                            name: 'punctuation.paren.open.kotlin'
+                        }
+                    },
+                    endCaptures: {
+                        '0': {
+                            name: 'punctuation.paren.close.kotlin'
+                        }
+                    },
+                    patterns: [{include: '#type-only-context'}]
+                },
+                { include: '#parameter-list' }
+            ]
+        },
+        generics: {
+            begin: `(?<=\\b(var|val|fun)\\b)\\s*(\\<)`,
+            end: '(?<!-)\\>',
+            beginCaptures: {
+                '0': {
+                    name: 'punctuation.bracket.angle.kotlin'
+                }
+            },
+            endCaptures: {
+                '0': {
+                    name: 'punctuation.bracket.angle.kotlin'
+                }
+            },
+            patterns: [
+                {
+                    include: '#type-only-context'
+                },
+                // {
+                //     include: '#code'
+                // },
             ]
         },
         'meta-brackets': {
@@ -663,7 +837,7 @@ export const kotlinTmLanguage: TmLanguage = {
             match: '((?<!@)\\b([A-Z][\\w]*)\\b(?!@))',
             captures: {
                 '2': {
-                    name: 'entity.name.class'
+                    name: 'entity.name.type.class.kotlin'
                 }
             }
         },
@@ -756,7 +930,7 @@ export const kotlinTmLanguage: TmLanguage = {
                                     name: 'keyword.other.documentation.kotlindoc.kotlin'
                                 },
                                 '2': {
-                                    name: 'entity.name.class'
+                                    name: 'entity.name.type.class.kotlin'
                                 }
                             }
                         },
