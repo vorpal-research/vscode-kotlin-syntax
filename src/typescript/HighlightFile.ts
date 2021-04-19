@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as Ajv from 'ajv';
 import * as shiki from 'shiki';
 import * as vsctm from 'vscode-textmate'
-import { kotlinTmLanguage } from "./Scala.tmLanguage";
+import {checkIncludes, kotlinTmLanguage} from "./Scala.tmLanguage";
 import {Highlighter} from "shiki";
 import * as util from "util";
 
@@ -34,9 +34,11 @@ async function main() {
 
     var validate = ajv.compile(JSON.parse(schema));
     var valid = validate(kotlinTmLanguage);
+    checkIncludes(kotlinTmLanguage, Object.keys(kotlinTmLanguage.repository))
     if (!valid) {
         console.error("The were validation errors.\n");
         console.error(validate.errors);
+        return
     }
 
     const grammar = vsctm.parseRawGrammar(JSON.stringify(kotlinTmLanguage), 'grammar.json')
