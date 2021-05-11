@@ -1,9 +1,9 @@
 {
-    "name": "scala",
-    "displayName": "Scala Syntax (official)",
-    "description": "Official Scala Syntax",
-    "version": "0.5.0",
-    "publisher": "scala-lang",
+    "name": "kotlin",
+    "displayName": "Kotlin syntax",
+    "description": "Kotlin syntax (alternate)",
+    "version": "0.0.1",
+    "publisher": "kotlin-language-research",
     "license": "SEE LICENSE IN LICENSE.md",
     "engines": {
         "vscode": "^1.52.0"
