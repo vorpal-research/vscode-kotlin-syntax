@@ -20,24 +20,27 @@
     "contributes": {
         "languages": [
             {
-                "id": "scala",
+                "id": "kotlin",
                 "aliases": [
-                    "Scala",
-                    "scala"
+                    "Kotlin",
+                    "kotlin"
                 ],
                 "extensions": [
-                    ".scala",
-                    ".sbt",
-                    ".sc"
+                    ".kotlin",
+                    ".kt",
+                    ".kts"
                 ],
                 "configuration": "./language-configuration.json"
             }
         ],
         "grammars": [
             {
-                "language": "scala",
-                "scopeName": "source.scala",
-                "path": "./syntaxes/Scala.tmLanguage.json"
+                "language": "kotlin",
+                "scopeName": "source.kotlin",
+                "path": "./syntaxes/Kotlin.tmLanguage.json",
+                "embeddedLanguages": {
+                    "meta.embedded.kdoc.markdown": "markdown"
+                }
             }
         ]
     },
@@ -52,15 +55,17 @@
         "shiki": "^0.9.3",
         "ts-node": "^9.1.1",
         "typescript": "^4.0.2",
+        "lodash": "^4.17.21",
+        "@types/lodash": "^4.14.168",
         "vsce": "^1.79.5",
         "vscode-tmgrammar-test": "0.0.10"
     },
     "scripts": {
         "clean": "rimraf scala-*.vsix",
-        "vscode:prepublish": "test -f ./syntaxes/Scala.tmLanguage.json",
+        "vscode:prepublish": "test -f ./syntaxes/Kotlin.tmLanguage.json",
         "vscode:publish": "vsce publish --yarn",
         "build": "npm-run-all build:syntax build:extension",
-        "build:syntax": "ts-node src/typescript/GenerateTmLanguageFile.ts > ./syntaxes/Scala.tmLanguage.json",
+        "build:syntax": "ts-node src/typescript/GenerateTmLanguageFile.ts > ./syntaxes/Kotlin.tmLanguage.json",
         "build:extension": "vsce package --yarn",
         "runHighlight": "ts-node src/typescript/HighlightFile.ts",
         "test": "npm-run-all test:*",

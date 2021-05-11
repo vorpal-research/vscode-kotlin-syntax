@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import * as Ajv from 'ajv';
 import * as shiki from 'shiki';
-import { kotlinTmLanguage } from "./Scala.tmLanguage";
+import { kotlinTmLanguage } from "./Kotlin.tmLanguage";
 
 let schema = fs.readFileSync('./src/schemas/tmlanguage.json').toString();
 

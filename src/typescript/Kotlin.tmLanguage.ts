@@ -1,6 +1,7 @@
 'use strict';
 import {TmLanguage} from './TMLanguageModel';
-import assert = require("assert");
+import * as assert from 'assert';
+import * as _ from 'lodash';
 
 const upperLetterChars = 'A-Z\\p{Lt}\\p{Lu}'
 const upperLetter = `[${upperLetterChars}]`
@@ -409,7 +410,7 @@ export const kotlinTmLanguage: TmLanguage = {
                 },
 
                 {
-                    begin: `\\b(?:(val)|(var))\\b\\s*(?=[(])`,
+                    begin: `\\b(?:(val)|(var))\\b(?=\\s*[(])`,
                     end: '(?<=\\))',
                     beginCaptures: {
                         '1': {name: 'keyword.declaration.stable.kotlin'},
@@ -435,7 +436,7 @@ export const kotlinTmLanguage: TmLanguage = {
                     }
                 },
                 {
-                    match: `\\b(?:(val)|(var))\\b\\s*(?!(${anyId}|([(])))`,
+                    match: `\\b(?:(val)|(var))\\b(?!\\s*(${anyId}|([(])))`,
                     captures: {
                         '1': {name: 'keyword.declaration.stable.kotlin'},
                         '2': {name: 'keyword.declaration.volatile.kotlin'}
@@ -669,27 +670,25 @@ export const kotlinTmLanguage: TmLanguage = {
                     beginCaptures: {
                         '1': {name: 'punctuation.definition.comment.kotlin'}
                     },
+                    contentName: 'meta.embedded.kdoc.markdown',
                     patterns: [
                         {
-                            match: '(@param)\\s+(\\S+)',
+                            match: '^\\s*\\*(?!/)',
+                            name: 'punctuation.definition.comment.kotlin'
+                        },
+                        {
+                            match: '(@(?:param|property|throws|exception|sample))\\s+(\\S+)',
                             captures: {
                                 '1': {name: 'keyword.other.documentation.kotlindoc.kotlin'},
                                 '2': {name: 'variable.parameter.kotlin'}
                             }
                         },
                         {
-                            match: '(@(?:tparam|throws))\\s+(\\S+)',
-                            captures: {
-                                '1': {name: 'keyword.other.documentation.kotlindoc.kotlin'},
-                                '2': {name: 'entity.name.type.class.kotlin'}
-                            }
-                        },
-                        {
-                            match: '@(return|see|note|example|constructor|usecase|author|version|since|todo|deprecated|migration|define|inheritdoc)\\b',
+                            match: '@(return|constructor|receiver|author|since|suppress)\\b',
                             name: 'keyword.other.documentation.kotlindoc.kotlin'
                         },
                         {
-                            match: '(\\[\\[)([^\\]]+)(\\]\\])',
+                            match: '(\\[)([^\\]]+)(\\])',
                             captures: {
                                 '1': {name: 'punctuation.definition.documentation.link.kotlin'},
                                 '2': {name: 'string.other.link.title.markdown'},
@@ -786,14 +785,14 @@ export const kotlinTmLanguage: TmLanguage = {
         'parameter-list': {
             patterns: [
                 {
-                    match: `(?<=[^\\._$a-zA-Z0-9])(${backQuotedId}|${idLower})\\s*(:)(?!:)\\s*`,
+                    match: `(?<=[^\\._$a-zA-Z0-9])(${backQuotedId}|${idLower})\\s*(:)(?!:)`,
                     captures: {
                         '1': {name: 'variable.parameter.kotlin'},
                         '2': {name: 'meta.colon.kotlin'}
                     }
                 },
                 {
-                    match: `(?<=[^:?]:)\\s*(${anyId})\\s*(?!\\<)`,
+                    match: `(?<=[^:?]:)\\s*(${anyId}\\?*)\\s*(?!\\<)`,
                     captures: {
                         '1': {name: 'entity.name.type.class.kotlin'}
                     }
@@ -837,18 +836,18 @@ export const kotlinTmLanguage: TmLanguage = {
 export function checkIncludes(obj: any, repKeys: string[]) {
     if (obj.include) {
         let key = obj.include
-        assert(typeof key === 'string')
+        assert(_.isString(key))
         key = key.replace('#', '')
-        assert(repKeys.indexOf(key) != -1, obj.include)
+        assert(repKeys.indexOf(key) != -1, key)
         return
     }
 
-    if (Array.isArray(obj)) {
+    if (_.isArray(obj)) {
         for (const element of obj) {
             checkIncludes(element, repKeys)
         }
-    } else if (typeof obj === 'object') {
-        for (const key of Object.keys(obj)) {
+    } else if (_.isObject(obj)) {
+        for (const key of _.keys(obj)) {
             const value = obj[key]
             checkIncludes(value, repKeys)
         }
